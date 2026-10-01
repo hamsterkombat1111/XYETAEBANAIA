@@ -8,8 +8,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "updater.h"
 
 #include "base/platform/win/base_windows_safe_library.h"
-#include "core/branding.h"
-#include <QtCore/QString>
 #include <string>
 
 bool _debug = false;
@@ -313,13 +311,13 @@ void updateRegistry() {
 								GetLocalTime(&stLocalTime);
 								RegSetValueEx(rkey, L"DisplayVersion", 0, REG_SZ, (const BYTE*)versionStr, ((versionLen / 2) + 1) * sizeof(WCHAR));
 								{
-									auto appName = QString::fromUtf8(Branding::AppName.utf8());
-									auto companyName = QString::fromUtf8(Branding::CompanyName.utf8());
-									wcscpy(nameStr, appName.toStdWString().c_str());
+									const WCHAR *appName = L"OwpenGram Desktop";
+									const WCHAR *companyName = L"OwpenGram";
+									wcscpy(nameStr, appName);
 									RegSetValueEx(rkey, L"DisplayName", 0, REG_SZ, (const BYTE*)nameStr, (wcslen(nameStr) + 1) * sizeof(WCHAR));
-									wcscpy(publisherStr, companyName.toStdWString().c_str());
+									wcscpy(publisherStr, companyName);
 									RegSetValueEx(rkey, L"Publisher", 0, REG_SZ, (const BYTE*)publisherStr, (wcslen(publisherStr) + 1) * sizeof(WCHAR));
-									wcscpy(icongroupStr, appName.toStdWString().c_str());
+									wcscpy(icongroupStr, appName);
 								}
 								RegSetValueEx(rkey, L"Inno Setup: Icon Group", 0, REG_SZ, (const BYTE*)icongroupStr, (wcslen(icongroupStr) + 1) * sizeof(WCHAR));
 								wsprintf(dateStr, L"%04d%02d%02d", stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay);
@@ -501,10 +499,7 @@ int APIENTRY wWinMain(HINSTANCE instance, HINSTANCE prevInstance, LPWSTR cmdPara
 }
 
 // folder in APPDATA, if current path is unavailable for writing
-static const WCHAR *_programName = []() -> const WCHAR* {
-	static std::wstring name = QString::fromUtf8(Branding::AppName.utf8()).toStdWString();
-	return name.c_str();
-}();
+static const WCHAR *_programName = L"OwpenGram Desktop";
 static const WCHAR *_exeName = L"Updater.exe";
 
 LPTOP_LEVEL_EXCEPTION_FILTER _oldWndExceptionFilter = 0;
