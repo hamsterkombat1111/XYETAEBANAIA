@@ -430,6 +430,17 @@ def runStages():
             continue
         clearCacheKey(stage)
         print('BUILDING:')
+        if win and stage['name'] == 'ffmpeg':
+            script_path = os.path.join(libsDir, 'patches', 'build_ffmpeg_win.sh')
+            if os.path.exists(script_path):
+                with open(script_path, 'r', encoding='utf-8') as f:
+                    c = f.read()
+                old_pkg = 'export PKG_CONFIG_PATH="$FullExecPath/../local/lib/pkgconfig:$PKG_CONFIG_PATH"'
+                new_pkg = 'export PKG_CONFIG_PATH="$(cygpath -m "$FullExecPath/../local/lib/pkgconfig");$(cygpath -m "$FullScriptPath/../local/lib/pkgconfig");$FullExecPath/../local/lib/pkgconfig;$PKG_CONFIG_PATH"'
+                if old_pkg in c:
+                    c = c.replace(old_pkg, new_pkg)
+                    with open(script_path, 'w', encoding='utf-8') as f:
+                        f.write(c)
         os.chdir(stage['directory'])
         if not run(commands):
             print(prefix + ': FAILED')
