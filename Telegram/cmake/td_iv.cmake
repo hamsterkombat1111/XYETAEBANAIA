@@ -181,13 +181,3 @@ PRIVATE
     tdesktop::td_ui
 )
 
-if (MSVC)
-    add_library(td_iv_warnings_off INTERFACE)
-    target_compile_options(td_iv_warnings_off
-    INTERFACE
-        /wd5038
-        /wd4265
-        /wd4005
-        /WX-)
-    target_link_libraries(td_iv PRIVATE td_iv_warnings_off)
-endif()

@@ -66,4 +66,34 @@ if officialTarget != '':
     if arch != '':
         arguments.append(arch)
 
+# Patch MicroTeX struct Stroke member initialization order
+microtex_header = os.path.join(scriptPath, 'ThirdParty', 'MicroTeX', 'src', 'graphic', 'graphic_basic.h')
+if os.path.isfile(microtex_header):
+    try:
+        with open(microtex_header, 'r', encoding='utf-8') as f:
+            c = f.read()
+        c = re.sub(
+            r'float\s+lineWidth;\s+float\s+miterLimit;\s+Cap\s+cap;\s+Join\s+join;',
+            'float lineWidth;\n  Cap cap;\n  Join join;\n  float miterLimit;',
+            c
+        )
+        with open(microtex_header, 'w', encoding='utf-8') as f:
+            f.write(c)
+        print('[PATCH] MicroTeX graphic_basic.h patched.')
+    except Exception as e:
+        print('[PATCH WARNING] Failed to patch MicroTeX: ' + str(e))
+
+# Replace /w15038 with /wd5038 in cmake/options_win.cmake
+options_win_path = os.path.join(scriptPath, '..', 'cmake', 'options_win.cmake')
+if os.path.isfile(options_win_path):
+    try:
+        with open(options_win_path, 'r', encoding='utf-8') as f:
+            c = f.read()
+        c = c.replace('/w15038', '/wd5038')
+        with open(options_win_path, 'w', encoding='utf-8') as f:
+            f.write(c)
+        print('[PATCH] cmake/options_win.cmake patched (/wd5038).')
+    except Exception as e:
+        print('[PATCH WARNING] Failed to patch options_win.cmake: ' + str(e))
+
 finish(run_cmake.run(scriptName, arguments))
