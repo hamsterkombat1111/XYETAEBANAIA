@@ -5,6 +5,10 @@ the official desktop application for the Telegram messaging service.
 For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include "updater.h"
 
 #include "base/platform/win/base_windows_safe_library.h"
@@ -313,11 +317,11 @@ void updateRegistry() {
 								{
 									const WCHAR *appName = L"OwpenGram Desktop";
 									const WCHAR *companyName = L"OwpenGram";
-									wcscpy(nameStr, appName);
+									wcscpy_s(nameStr, appName);
 									RegSetValueEx(rkey, L"DisplayName", 0, REG_SZ, (const BYTE*)nameStr, (wcslen(nameStr) + 1) * sizeof(WCHAR));
-									wcscpy(publisherStr, companyName);
+									wcscpy_s(publisherStr, companyName);
 									RegSetValueEx(rkey, L"Publisher", 0, REG_SZ, (const BYTE*)publisherStr, (wcslen(publisherStr) + 1) * sizeof(WCHAR));
-									wcscpy(icongroupStr, appName);
+									wcscpy_s(icongroupStr, appName);
 								}
 								RegSetValueEx(rkey, L"Inno Setup: Icon Group", 0, REG_SZ, (const BYTE*)icongroupStr, (wcslen(icongroupStr) + 1) * sizeof(WCHAR));
 								wsprintf(dateStr, L"%04d%02d%02d", stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay);
