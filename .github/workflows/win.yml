@@ -100,21 +100,6 @@ jobs:
           git config --global user.email "you@example.com"
           git config --global user.name "Sample"
 
-          python -c "
-import os, re
-p1 = '$TBUILD/$REPO_NAME/Telegram/ThirdParty/MicroTeX/src/graphic/graphic_basic.h'
-if os.path.isfile(p1):
-    c = open(p1, 'r', encoding='utf-8').read()
-    c = re.sub(r'float\s+lineWidth;\s+float\s+miterLimit;\s+Cap\s+cap;\s+Join\s+join;', 'float lineWidth;\n  Cap cap;\n  Join join;\n  float miterLimit;', c)
-    open(p1, 'w', encoding='utf-8').write(c)
-    print('MicroTeX graphic_basic.h patched successfully')
-p2 = '$TBUILD/$REPO_NAME/cmake/options_win.cmake'
-if os.path.isfile(p2):
-    c = open(p2, 'r', encoding='utf-8').read().replace('/w15038', '/wd5038')
-    open(p2, 'w', encoding='utf-8').write(c)
-    print('cmake options_win.cmake patched successfully')
-"
-
       - name: Install VS 2026 Build Tools.
         if: matrix.arch == 'arm64'
         shell: pwsh
