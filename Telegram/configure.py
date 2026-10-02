@@ -66,34 +66,51 @@ if officialTarget != '':
     if arch != '':
         arguments.append(arch)
 
-# Patch MicroTeX struct Stroke member initialization order
-microtex_header = os.path.join(scriptPath, 'ThirdParty', 'MicroTeX', 'src', 'graphic', 'graphic_basic.h')
-if os.path.isfile(microtex_header):
-    try:
-        with open(microtex_header, 'r', encoding='utf-8') as f:
+# --- Patch MicroTeX and cmake warning suppressions ---
+try:
+    p_gb = os.path.join(scriptPath, 'ThirdParty', 'MicroTeX', 'src', 'graphic', 'graphic_basic.h')
+    if os.path.isfile(p_gb):
+        with open(p_gb, 'r', encoding='utf-8') as f:
             c = f.read()
-        c = re.sub(
-            r'float\s+lineWidth;\s+float\s+miterLimit;\s+Cap\s+cap;\s+Join\s+join;',
-            'float lineWidth;\n  Cap cap;\n  Join join;\n  float miterLimit;',
-            c
-        )
-        with open(microtex_header, 'w', encoding='utf-8') as f:
+        c = re.sub(r'float\s+lineWidth;\s+float\s+miterLimit;\s+Cap\s+cap;\s+Join\s+join;', 'float lineWidth;\n  Cap cap;\n  Join join;\n  float miterLimit;', c)
+        with open(p_gb, 'w', encoding='utf-8') as f:
             f.write(c)
-        print('[PATCH] MicroTeX graphic_basic.h patched.')
-    except Exception as e:
-        print('[PATCH WARNING] Failed to patch MicroTeX: ' + str(e))
 
-# Replace /w15038 with /wd5038 in cmake/options_win.cmake
-options_win_path = os.path.join(scriptPath, '..', 'cmake', 'options_win.cmake')
-if os.path.isfile(options_win_path):
-    try:
-        with open(options_win_path, 'r', encoding='utf-8') as f:
+    p_gh = os.path.join(scriptPath, 'ThirdParty', 'MicroTeX', 'src', 'graphic', 'graphic.h')
+    if os.path.isfile(p_gh):
+        with open(p_gh, 'r', encoding='utf-8') as f:
+            c = f.read()
+        if 'virtual ~TextLayout() = default;' not in c:
+            c = c.replace('class TextLayout {\npublic:', 'class TextLayout {\npublic:\n  virtual ~TextLayout() = default;')
+        if 'virtual ~Graphics2D() = default;' not in c:
+            c = c.replace('class Graphics2D {\npublic:', 'class Graphics2D {\npublic:\n  virtual ~Graphics2D() = default;')
+        with open(p_gh, 'w', encoding='utf-8') as f:
+            f.write(c)
+
+    p_gqt = os.path.join(scriptPath, 'ThirdParty', 'MicroTeX', 'src', 'platform', 'qt', 'graphic_qt.h')
+    if os.path.isfile(p_gqt):
+        with open(p_gqt, 'r', encoding='utf-8') as f:
+            c = f.read()
+        if 'virtual ~TextLayout_qt() = default;' not in c:
+            c = c.replace('TextLayout_qt(const std::wstring& src, const sptr<Font_qt>& font);', 'TextLayout_qt(const std::wstring& src, const sptr<Font_qt>& font);\n  virtual ~TextLayout_qt() = default;')
+        if 'virtual ~Graphics2D_qt() = default;' not in c:
+            c = c.replace('Graphics2D_qt(QPainter* painter);', 'Graphics2D_qt(QPainter* painter);\n  virtual ~Graphics2D_qt() = default;')
+        with open(p_gqt, 'w', encoding='utf-8') as f:
+            f.write(c)
+
+    p_opt = os.path.join(scriptPath, '..', 'cmake', 'options_win.cmake')
+    if os.path.isfile(p_opt):
+        with open(p_opt, 'r', encoding='utf-8') as f:
             c = f.read()
         c = c.replace('/w15038', '/wd5038')
-        with open(options_win_path, 'w', encoding='utf-8') as f:
+        c = c.replace('/w14265', '/wd4265')
+        c = re.sub(r'(\s+)/WX(\s+)', r'\1/WX-\2', c)
+        with open(p_opt, 'w', encoding='utf-8') as f:
             f.write(c)
-        print('[PATCH] cmake/options_win.cmake patched (/wd5038).')
-    except Exception as e:
-        print('[PATCH WARNING] Failed to patch options_win.cmake: ' + str(e))
+
+    print('[PATCH] MicroTeX headers and cmake options patched successfully.', flush=True)
+except Exception as e:
+    print('[PATCH WARNING] ' + str(e), flush=True)
+# ---------------------------------------------------
 
 finish(run_cmake.run(scriptName, arguments))
