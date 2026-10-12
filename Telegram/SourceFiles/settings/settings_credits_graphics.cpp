@@ -1623,7 +1623,7 @@ void GenericCreditsEntryBody(
 		&& (e.in || giftToChannelCanTransfer);
 	const auto starGiftSender = (isStarGift && item)
 		? item->history()->peer->asUser()
-		: (isStarGift && e.in)
+		: (isStarGift && e.in && e.barePeerId)
 		? owner->peer(PeerId(e.barePeerId))->asUser()
 		: (isStarGift && e.bareActorId)
 		? owner->peer(PeerId(e.bareActorId)).get()
