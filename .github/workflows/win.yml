@@ -237,8 +237,13 @@ jobs:
         shell: bash
         run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' ')' -type f ')' -o -empty ')' -delete
 
+      - name: Run sccache-action
+        uses: mozilla-actions/sccache-action@v0.0.11
+
       - name: Telegram Desktop build.
         if: env.ONLY_CACHE == 'false'
+        env:
+          SCCACHE_GHA_ENABLED: "true"
         run: |
           cd %TBUILD%\%REPO_NAME%\Telegram
 
@@ -247,6 +252,8 @@ jobs:
           %TDESKTOP_BUILD_ARCH% ^
           ${{ matrix.qt }} ^
           %TDESKTOP_BUILD_API% ^
+          -D CMAKE_C_COMPILER_LAUNCHER=sccache ^
+          -D CMAKE_CXX_COMPILER_LAUNCHER=sccache ^
           -D CMAKE_CONFIGURATION_TYPES=Debug ^
           -D CMAKE_COMPILE_WARNING_AS_ERROR=OFF ^
           -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
@@ -255,6 +262,10 @@ jobs:
           %TDESKTOP_BUILD_DEFINE%
 
           cmake --build ..\out --config Debug --parallel
+
+      - name: sccache stats
+        if: always()
+        run: sccache --show-stats
 
       - name: Move artifact.
         if: (env.UPLOAD_ARTIFACT == 'true') || (github.ref == 'refs/heads/nightly')
