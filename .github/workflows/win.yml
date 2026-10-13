@@ -165,7 +165,7 @@ jobs:
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent ${{ matrix.qt }}
 
       - name: Save Libraries cache.
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         if: steps.cache-libs.outputs.cache-hit != 'true'
         with:
           path: |
@@ -177,7 +177,7 @@ jobs:
           key: ${{ runner.OS }}-${{ matrix.arch }}-libs-v2-${{ env.CACHE_KEY }}
 
       - name: Save Qt cache.
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         if: steps.cache-qt.outputs.cache-hit != 'true'
         with:
           path: |
